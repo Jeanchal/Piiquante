@@ -1,0 +1,6 @@
+node_modules
+images
+.env
+tests
+babel.config.js
+jest.config.js
