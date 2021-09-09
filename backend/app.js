@@ -2,6 +2,7 @@ const express = require("express");
 const routesSauces = require("./routes/routesSauces");
 const routesUsers = require("./routes/routesUsers");
 const path = require("path");
+require("./mongodb");
 
 const app = express();
 

@@ -1,28 +1,28 @@
-const request = require("supertest");
-const app = require("../app");
+process.env.IMAGEDIR = "tests/images";
 const { MongoMemoryServer } = require("mongodb-memory-server");
-const mongoose = require("mongoose");
+const request = require("supertest");
 const fs = require("fs");
+const path = require("path");
 let auth;
 let idSauce;
-let idUser;
 let mongoServer;
+let app;
 
-function suppFile(target) {
-  const filename = target.imageUrl.split("/images/")[1];
-  fs.unlink(`images/${filename}`, () => {});
+function emptyDir(directory) {
+  fs.readdir(directory, (err, files) => {
+    if (err) throw err;
+    for (const file of files) {
+      fs.unlink(path.join(directory, file), (err) => {
+        if (err) throw err;
+      });
+    }
+  });
 }
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-  mongoose
-    .connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
-    .then(() => console.log("Connexion à MongoDB réussie !"))
-    .catch(() => console.log("Connexion à MongoDB échouée !"));
+  process.env.DB_URL = mongoServer.getUri();
+  app = require("../app");
 });
 
 describe("Tests API", function () {
@@ -34,9 +34,6 @@ describe("Tests API", function () {
     const response = await request(app).post("/api/auth/signup").send(user);
     expect(response.statusCode).toBe(201);
     expect(response.body.message).toBe("Utilisateur créé !");
-    expect(response.body.user.email).toBe(user.email);
-    expect(response.body.user.password).not.toBe(user.password);
-    idUser = response.body.user._id;
   });
   test("route loginUser", async () => {
     const response = await request(app).post("/api/auth/login").send({
@@ -44,7 +41,6 @@ describe("Tests API", function () {
       password: "jean@jean",
     });
     expect(response.statusCode).toBe(200);
-    expect(response.body.userId).toEqual(idUser);
     expect(response.body.message).toBe("Utilisateur connecté !");
     auth = {
       userId: response.body.userId,
@@ -72,7 +68,7 @@ describe("Tests API", function () {
     expect(response.body.sauce.mainPepper).toBe(sauce.mainPepper);
     expect(response.body.sauce.heat).toBe(sauce.heat);
     idSauce = response.body.sauce._id;
-    suppFile(response.body.sauce);
+    // suppFile(response.body.sauce);
   });
   test("route getAllSauces", async () => {
     const sauce = {
@@ -88,15 +84,19 @@ describe("Tests API", function () {
       .field("sauce", JSON.stringify(sauce))
       .attach("image", __dirname + "/test-image.jpg")
       .auth(auth.token, { type: "bearer" });
-    suppFile(response.body.sauce);
-    response = await request(app).get("/api/sauces");
+    // suppFile(response.body.sauce);
+    response = await request(app)
+      .get("/api/sauces")
+      .auth(auth.token, { type: "bearer" });
     expect(response.statusCode).toBe(200);
     expect(response.body.length).toBe(2);
     expect(response.body[0].name).toEqual("Sauce Bechamel");
     expect(response.body[1].name).toEqual("Sauce Tomate");
   });
   test("route getOneSauce", async () => {
-    const response = await request(app).get("/api/sauces/" + idSauce);
+    const response = await request(app)
+      .get("/api/sauces/" + idSauce)
+      .auth(auth.token, { type: "bearer" });
     expect(response.statusCode).toBe(200);
     expect(response.body.name).toEqual("Sauce Bechamel");
     expect(response.body._id).toEqual(idSauce);
@@ -128,7 +128,8 @@ describe("Tests API", function () {
       .send({
         userId: auth.userId,
         like: 1,
-      });
+      })
+      .auth(auth.token, { type: "bearer" });
     expect(response.statusCode).toEqual(200);
     expect(response.body.message).toBe("Sauce likée !");
     expect(response.body.sauce.likes).toBe(1);
@@ -137,7 +138,8 @@ describe("Tests API", function () {
       .send({
         userId: auth.userId,
         like: 0,
-      });
+      })
+      .auth(auth.token, { type: "bearer" });
     expect(response.statusCode).toEqual(200);
     expect(response.body.message).toBe("Like annulé !");
     expect(response.body.sauce.likes).toBe(0);
@@ -146,7 +148,8 @@ describe("Tests API", function () {
       .send({
         userId: auth.userId,
         like: -1,
-      });
+      })
+      .auth(auth.token, { type: "bearer" });
     expect(response.statusCode).toEqual(200);
     expect(response.body.message).toBe("Sauce Dislikée !");
     expect(response.body.sauce.dislikes).toBe(1);
@@ -155,7 +158,8 @@ describe("Tests API", function () {
       .send({
         userId: auth.userId,
         like: 0,
-      });
+      })
+      .auth(auth.token, { type: "bearer" });
     expect(response.statusCode).toEqual(200);
     expect(response.body.message).toBe("Dislike annulé !");
     expect(response.body.sauce.likes).toBe(0);
@@ -171,6 +175,7 @@ describe("Tests API", function () {
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
+  await require("mongoose").disconnect();
   await mongoServer.stop();
+  emptyDir("tests/images");
 });
