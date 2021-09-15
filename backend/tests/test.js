@@ -68,7 +68,6 @@ describe("Tests API", function () {
     expect(response.body.sauce.mainPepper).toBe(sauce.mainPepper);
     expect(response.body.sauce.heat).toBe(sauce.heat);
     idSauce = response.body.sauce._id;
-    // suppFile(response.body.sauce);
   });
   test("route getAllSauces", async () => {
     const sauce = {
