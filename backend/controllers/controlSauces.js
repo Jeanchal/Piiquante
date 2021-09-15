@@ -49,26 +49,47 @@ exports.likeSauce = async (req, res, next) => {
         sauceLikes.splice(indexUser, 1);
         sauce.likes--;
         message = "Like annulé !";
-      }
-      if (sauceDislikes.includes(req.userId)) {
-        let indexUser = sauceDislikes.indexOf(req.userId);
-        sauceDislikes.splice(indexUser, 1);
-        sauce.dislikes--;
-        message = "Dislike annulé !";
+      } else {
+        if (sauceDislikes.includes(req.userId)) {
+          let indexUser = sauceDislikes.indexOf(req.userId);
+          sauceDislikes.splice(indexUser, 1);
+          sauce.dislikes--;
+          message = "Dislike annulé !";
+        } else {
+          res.status(400).json({
+            error: "Erreur, aucun like ou dislike a annuler !",
+          });
+        }
       }
     }
     if (req.body.like === 1) {
       if (!sauceLikes.includes(req.userId)) {
-        sauceLikes.push(req.userId);
-        sauce.likes++;
-        message = "Sauce likée !";
+        if (!sauceDislikes.includes(req.userId)) {
+          sauceLikes.push(req.userId);
+          sauce.likes++;
+          message = "Sauce likée !";
+        } else {
+          res.status(400).json({
+            error: "impossible de liker la sauce !",
+          });
+        }
+      } else {
+        res.status(400).json({ error: "Erreur, sauce déja likée !" });
       }
     }
     if (req.body.like === -1) {
       if (!sauceDislikes.includes(req.userId)) {
-        sauceDislikes.push(req.userId);
-        sauce.dislikes++;
-        message = "Sauce Dislikée !";
+        if (!sauceLikes.includes(req.userId)) {
+          sauceDislikes.push(req.userId);
+          sauce.dislikes++;
+          message = "Sauce Dislikée !";
+        } else {
+          res.status(400).json({
+            error: "impossible de disliker la sauce !",
+          });
+        }
+      } else {
+        res.status(400).json({ error: "Erreur, sauce déja dislikée !" });
       }
     }
     sauce.save();
