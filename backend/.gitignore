@@ -1,4 +1,4 @@
-node_modules
 images/*
+node_modules
+tests/images
 .env
-tests/images/*
