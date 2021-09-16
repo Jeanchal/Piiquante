@@ -5,8 +5,8 @@ README
 - Se placer dans le dossier backend
 - créer le fichier .env
 - copier le contenu du fichier .env-dist et coller dans le fichier .env
-- remplacer "url de mongodb" par une url valide vers Mongodb.
-- remplacer "clé de sécurité pour token jwt" par un Token de sécurité.
+- remplacer "url de mongodb" par une url valide vers Mongodb (pour se connecter à la base de données).
+- remplacer "clé de sécurité pour token jwt" par un Token de sécurité (pour sécuriser l'accés à l'API).
 - remplacer "chemin dossier images" par "images".
 ATTENTION: sur chaque ligne, il ne doit y avoir aucun espace
 
