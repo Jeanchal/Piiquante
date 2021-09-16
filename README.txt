@@ -2,10 +2,11 @@ README
 
 *Pour faire fonctionner l'application:
 
-- Se placer dans le dossier backend
-- créer le fichier .env
-- copier le contenu du fichier .env-dist et coller dans le fichier .env
-- remplacer "url de mongodb" par une url valide vers Mongodb (pour se connecter à la base de données).
+- Créer une base de données Mongodb, nommée test-newApi
+- Se placer dans le dossier backend et créer un dossier "images", puis créer un fichier .env, copier le contenu du fichier .env-dist et coller dans le fichier .env
+
+Dans le fichier .env:
+- remplacer "url de mongodb" par une url valide vers Mongodb (pour se connecter à la base de données test-newApi).
 - remplacer "clé de sécurité pour token jwt" par un Token de sécurité (pour sécuriser l'accés à l'API).
 - remplacer "chemin dossier images" par "images".
 ATTENTION: sur chaque ligne, il ne doit y avoir aucun espace
