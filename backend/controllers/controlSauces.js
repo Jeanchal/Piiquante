@@ -43,6 +43,34 @@ exports.likeSauce = async (req, res, next) => {
   const sauceDislikes = sauce.usersDisliked;
   let message;
   try {
+    if (req.body.like === 1) {
+      if (!sauceLikes.includes(req.userId)) {
+        if (!sauceDislikes.includes(req.userId)) {
+          sauceLikes.push(req.userId);
+          sauce.likes++;
+          message = "Sauce likée !";
+        } else {
+          res
+            .status(400)
+            .json({ error: "impossible, la sauce est dislikée !" });
+        }
+      } else {
+        res.status(400).json({ error: "Erreur, la sauce est déja likée !" });
+      }
+    }
+    if (req.body.like === -1) {
+      if (!sauceDislikes.includes(req.userId)) {
+        if (!sauceLikes.includes(req.userId)) {
+          sauceDislikes.push(req.userId);
+          sauce.dislikes++;
+          message = "Sauce Dislikée !";
+        } else {
+          res.status(400).json({ error: "impossible, la sauce est likée !" });
+        }
+      } else {
+        res.status(400).json({ error: "Erreur, la sauce est déja dislikée !" });
+      }
+    }
     if (req.body.like === 0) {
       if (sauceLikes.includes(req.userId)) {
         let indexUser = sauceLikes.indexOf(req.userId);
@@ -57,39 +85,9 @@ exports.likeSauce = async (req, res, next) => {
           message = "Dislike annulé !";
         } else {
           res.status(400).json({
-            error: "Erreur, aucun like ou dislike a annuler !",
+            error: "impossible d'annuler le like ou le dislike",
           });
         }
-      }
-    }
-    if (req.body.like === 1) {
-      if (!sauceLikes.includes(req.userId)) {
-        if (!sauceDislikes.includes(req.userId)) {
-          sauceLikes.push(req.userId);
-          sauce.likes++;
-          message = "Sauce likée !";
-        } else {
-          res.status(400).json({
-            error: "impossible de liker la sauce !",
-          });
-        }
-      } else {
-        res.status(400).json({ error: "Erreur, sauce déja likée !" });
-      }
-    }
-    if (req.body.like === -1) {
-      if (!sauceDislikes.includes(req.userId)) {
-        if (!sauceLikes.includes(req.userId)) {
-          sauceDislikes.push(req.userId);
-          sauce.dislikes++;
-          message = "Sauce Dislikée !";
-        } else {
-          res.status(400).json({
-            error: "impossible de disliker la sauce !",
-          });
-        }
-      } else {
-        res.status(400).json({ error: "Erreur, sauce déja dislikée !" });
       }
     }
     sauce.save();
