@@ -83,7 +83,6 @@ describe("Tests API", function () {
       .field("sauce", JSON.stringify(sauce))
       .attach("image", __dirname + "/test-image.jpg")
       .auth(auth.token, { type: "bearer" });
-    // suppFile(response.body.sauce);
     response = await request(app)
       .get("/api/sauces")
       .auth(auth.token, { type: "bearer" });
